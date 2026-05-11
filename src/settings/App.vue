@@ -49,7 +49,7 @@ async function toggleAutoStart() {
 }
 
 function checkUpdate() {
-  window.settingsAPI.openExternal('https://gitee.com/ckklin/memo---to-do-tool/releases')
+  window.settingsAPI.openExternal('https://github.com/CKKLIN/Erzhi-todo/releases')
 }
 
 function onThemeChanged(themeJson: string) {
