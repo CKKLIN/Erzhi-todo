@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html { background: transparent; }
+    body { background: transparent; }
+    .menu {
+      font-family: -apple-system, 'Microsoft YaHei', sans-serif;
+      background: rgba(30, 30, 46, 0.96);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 10px;
+      padding: 10px 12px;
+      overflow: hidden;
+      user-select: none;
+    }
+    .label { font-size: 11px; color: #585b70; }
+    .time { font-size: 13px; color: #cdd6f4; font-variant-numeric: tabular-nums; margin-bottom: 6px; }
+    .divider { height: 1px; background: rgba(255, 255, 255, 0.08); margin: 6px 0; }
+    .color-row { display: flex; gap: 6px; flex-wrap: wrap; }
+    .swatch {
+      width: 20px; height: 20px; border-radius: 50%; cursor: pointer;
+      border: 2px solid transparent; transition: all 0.15s;
+      position: relative; flex-shrink: 0;
+    }
+    .swatch:hover { transform: scale(1.2); }
+    .swatch.active { border-color: #cdd6f4; box-shadow: 0 0 0 2px rgba(205, 214, 244, 0.3); }
+    .swatch .remove-hint {
+      display: none; position: absolute; top: -3px; right: -3px;
+      width: 10px; height: 10px; border-radius: 50%;
+      background: #f38ba8; color: #1e1e2e; font-size: 8px;
+      line-height: 10px; text-align: center; font-weight: bold;
+    }
+    .swatch.custom:hover .remove-hint { display: block; }
+    .color-picker-wrap {
+      display: inline-flex; align-items: center; gap: 6px; flex-shrink: 0;
+    }
+    .color-picker-btn {
+      width: 20px; height: 20px; border-radius: 50%;
+      border: 2px dashed rgba(255,255,255,0.25); background: none;
+      cursor: pointer; display: flex; align-items: center;
+      justify-content: center; color: rgba(255,255,255,0.4);
+      font-size: 14px; transition: all 0.15s; flex-shrink: 0;
+      position: relative;
+    }
+    .color-picker-btn:hover {
+      border-color: rgba(255,255,255,0.5); color: rgba(255,255,255,0.7);
+    }
+    .color-picker-btn input[type="color"] {
+      position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+      opacity: 0; cursor: pointer; border: none;
+    }
+    .save-color-btn {
+      display: none; width: 20px; height: 20px; border-radius: 50%;
+      border: 2px solid rgba(166, 227, 161, 0.5); background: none;
+      cursor: pointer; align-items: center; justify-content: center;
+      color: #a6e3a1; font-size: 12px; transition: all 0.15s; flex-shrink: 0;
+    }
+    .save-color-btn:hover {
+      background: rgba(166, 227, 161, 0.2); border-color: #a6e3a1;
+    }
+    .save-color-btn.visible { display: flex; }
+    .reminder-row { margin-bottom: 2px; }
+    .reminder-time { color: #f9e2af; }
+  </style>
+</head>
+<body>
+  <div class="menu">
+    <div class="label">创建时间</div>
+    <div class="time" id="time"></div>
+    <div id="reminder-row" class="reminder-row" style="display:none">
+      <div class="label">提醒时间</div>
+      <div class="time reminder-time" id="reminderTime"></div>
+    </div>
+    <div class="divider"></div>
+    <div class="label" style="margin-bottom:6px">颜色</div>
+    <div class="color-row" id="colors"></div>
+  </div>
+
+  <script>
+    const PRESET_COLORS = ['#f38ba8','#fab387','#f9e2af','#a6e3a1','#94e2d5','#89b4fa','#cba6f7','#f5c2e7']
+    const SAVED_KEY = 'memo-saved-colors'
+    let currentColor = PRESET_COLORS[0]
+
+    function loadSaved() {
+      try { return JSON.parse(localStorage.getItem(SAVED_KEY)) || [] } catch { return [] }
+    }
+    function saveSaved(colors) { localStorage.setItem(SAVED_KEY, JSON.stringify(colors)) }
+    function removeSaved(color) {
+      const saved = loadSaved()
+      const idx = saved.indexOf(color)
+      if (idx !== -1) { saved.splice(idx, 1); saveSaved(saved) }
+      renderColors()
+    }
+
+    window.menuAPI.onData(({ time, currentColor: cc, reminderTime: rt }) => {
+      document.getElementById('time').textContent = time
+      currentColor = cc
+      const reminderRow = document.getElementById('reminder-row')
+      if (rt) {
+        document.getElementById('reminderTime').textContent = rt
+        reminderRow.style.display = ''
+      } else {
+        reminderRow.style.display = 'none'
+      }
+      renderColors()
+    })
+
+    function makeSwatch(color) {
+      const s = document.createElement('span')
+      s.className = 'swatch' + (color === currentColor ? ' active' : '')
+      s.style.background = color
+      s.onclick = () => window.menuAPI.pickColor(color)
+      return s
+    }
+
+    function renderColors() {
+      const container = document.getElementById('colors')
+      container.innerHTML = ''
+
+      PRESET_COLORS.forEach(c => container.appendChild(makeSwatch(c)))
+
+      const saved = loadSaved()
+      saved.forEach(c => {
+        const s = makeSwatch(c)
+        s.classList.add('custom')
+        const hint = document.createElement('span')
+        hint.className = 'remove-hint'
+        hint.textContent = '×'
+        hint.onclick = (e) => { e.stopPropagation(); removeSaved(c) }
+        s.appendChild(hint)
+        container.appendChild(s)
+      })
+
+      const pickerWrap = document.createElement('span')
+      pickerWrap.className = 'color-picker-wrap'
+      const pickerBtn = document.createElement('button')
+      pickerBtn.className = 'color-picker-btn'
+      pickerBtn.textContent = '+'
+      const pickerInput = document.createElement('input')
+      pickerInput.type = 'color'
+      pickerInput.value = '#ffffff'
+      pickerInput.onchange = () => {
+        pendingColor = pickerInput.value
+        pickerBtn.style.background = pendingColor
+        pickerBtn.style.borderStyle = 'solid'
+        pickerBtn.style.borderColor = pendingColor
+        pickerBtn.textContent = ''
+        saveBtn.classList.add('visible')
+      }
+      pickerBtn.appendChild(pickerInput)
+
+      let pendingColor = null
+      const saveBtn = document.createElement('button')
+      saveBtn.className = 'save-color-btn'
+      saveBtn.textContent = '✓'
+      saveBtn.onclick = () => {
+        if (!pendingColor) return
+        const saved = loadSaved()
+        if (!saved.includes(pendingColor)) { saved.push(pendingColor); saveSaved(saved) }
+        window.menuAPI.pickColor(pendingColor)
+        pendingColor = null
+        pickerBtn.style.background = ''
+        pickerBtn.style.borderStyle = ''
+        pickerBtn.style.borderColor = ''
+        pickerBtn.textContent = '+'
+        saveBtn.classList.remove('visible')
+      }
+
+      pickerWrap.appendChild(pickerBtn)
+      pickerWrap.appendChild(saveBtn)
+      container.appendChild(pickerWrap)
+    }
+  </script>
+</body>
+</html>
