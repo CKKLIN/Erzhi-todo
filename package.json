@@ -1,0 +1,62 @@
+{
+  "name": "Erzhi-todo",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "main": "dist-electron/main.js",
+  "scripts": {
+    "dev": "chcp 65001 && vite 2>NUL",
+    "dev:editor": "chcp 65001 && vite --config vite.config.editor.ts --port 5174 2>NUL",
+    "dev:all": "chcp 65001 && vite 2>NUL & vite --config vite.config.editor.ts --port 5174 2>NUL",
+    "build": "vue-tsc -b && vite build && vite build --config vite.config.editor.ts && electron-builder --win",
+    "preview": "vite preview"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "@element-plus/icons-vue": "^2.3.2",
+    "@tiptap/extension-image": "^3.22.4",
+    "@tiptap/extension-text-align": "^3.22.4",
+    "@tiptap/extension-underline": "^3.22.4",
+    "@tiptap/pm": "^3.22.4",
+    "@tiptap/starter-kit": "^3.22.4",
+    "@tiptap/vue-3": "^3.22.4",
+    "@types/node": "^24.12.2",
+    "@vitejs/plugin-vue": "^6.0.6",
+    "@vue/tsconfig": "^0.9.1",
+    "element-plus": "^2.13.7",
+    "electron": "^32.3.3",
+    "electron-builder": "^26.8.1",
+    "esbuild": "^0.28.0",
+    "typescript": "~6.0.2",
+    "vite": "^8.0.9",
+    "vite-plugin-electron": "^0.29.1",
+    "vite-plugin-electron-renderer": "^0.14.6",
+    "vue": "^3.5.32",
+    "vue-tsc": "^3.2.7"
+  },
+  "build": {
+    "productName": "二支待办",
+    "directories": {
+      "output": "release"
+    },
+    "files": [
+      "dist/**/*",
+      "dist-editor/**/*",
+      "dist-electron/**/*",
+      "public/**/*",
+      "package.json"
+    ],
+    "extraResources": [
+      {
+        "from": "build",
+        "to": "build"
+      }
+    ],
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true
+    }
+  }
+}
