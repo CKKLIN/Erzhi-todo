@@ -1,0 +1,21 @@
+[core]
+	repositoryformatversion = 0
+	filemode = false
+	bare = false
+	logallrefupdates = true
+	symlinks = false
+	ignorecase = true
+[remote "ee"]
+	url = https://gitee.com/ckklin/erzhi-todo.git
+	fetch = +refs/heads/*:refs/remotes/ee/*
+[remote "hub"]
+	url = https://github.com/CKKLIN/Erzhi-todo.git
+	fetch = +refs/heads/*:refs/remotes/hub/*
+[branch "main"]
+	remote = all
+	merge = refs/heads/main
+[remote "all"]
+	url = https://github.com/CKKLIN/Erzhi-todo.git
+	fetch = +refs/heads/*:refs/remotes/all/*
+	pushurl = https://github.com/CKKLIN/Erzhi-todo.git
+	pushurl = https://gitee.com/ckklin/erzhi-todo.git
