@@ -2,6 +2,8 @@
 
 安装包下载地址：release/或者https://github.com/CKKLIN/Erzhi-todo/releases
 
+技术栈：Vue3 + Electron + TypeScript + Element-Plus + Node.js
+
 问题反馈wx:richman--erzhi
 
 待办列表窗口
